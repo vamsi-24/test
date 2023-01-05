@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="04887673-6fe8-4a22-8fe1-d928cc57df23" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="dw_hwFlow" doc:id="3c71de35-8b3a-4c78-9873-d1cc9361bb89" >
+		<http:listener doc:name="Listener" doc:id="00a8cfa1-60b8-4e2c-a19d-54a250f3eb8d" config-ref="HTTP_Listener_config" path="/dw"/>
+		<logger level="INFO" doc:name="Logger" doc:id="38f33dde-d2d0-4433-83e5-60a39af552d8" message="started"/>
+		<ee:transform doc:name="Transform Message" doc:id="dd557f43-a43a-420b-8d65-58db7f19a0f8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+ "data":
+   {
+     "type": payload."type"[0],
+     "attributes": 
+      {
+         "items": flatten(payload ++ payload.employeeAddress) map 
+         
+         {
+              "zip": $.zip,
+            "address": $.Address
+         }
+
+
+
+      }
+   }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

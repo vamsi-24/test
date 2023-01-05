@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+ 
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+    xmlns="http://www.mulesoft.org/schema/mule/core"
+    xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<flow name="sync-Flow" doc:id="7b241383-7ec0-4191-b405-d3a49782dcbf" >
+<http:listener doc:name="Listener" doc:id="3a26bb15-acab-4c69-a96c-6ca54405b796" config-ref="HTTP_Listener_config" path="/sync"/>
+<set-payload value='#[(now()) as String {format:"hh:mm:ss"}]' doc:name="starttime" doc:id="869b3662-00cf-400a-87be-d77afee234c1" />
+<set-variable value="#[payload]" doc:name="giving start time" doc:id="352962b3-584f-44bb-8df1-ca4b5cb75234" variableName="starttime"/>
+<logger level="INFO" doc:name="task1" doc:id="87f36a46-d3bf-43ea-8c28-0fc76f5ca9a2"/>
+<ee:transform doc:name="Transform Message" doc:id="23cb301c-80b3-4b5e-9edf-9c4a93de4225" >
+<ee:message >
+<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::Runtime
+output application/json
+---
+payload wait 5000 ]]></ee:set-payload>
+</ee:message>
+</ee:transform>
+<logger level="INFO" doc:name="task2" doc:id="7c76bbde-93d9-4f09-9a2d-59ceaaa1a37c" />
+<ee:transform doc:name="Transform Message" doc:id="5eae416a-8b37-42a0-9e19-54e387a4751b" >
+<ee:message >
+<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::Runtime
+output application/json
+---
+payload wait 1000]]></ee:set-payload>
+</ee:message>
+</ee:transform>
+<logger level="INFO" doc:name="task3" doc:id="b381e48d-8db0-4f7c-be52-e12863d24bb9" />
+<ee:transform doc:name="Transform Message" doc:id="e0974635-c49c-4a79-96c0-a0b3b5ae846b" >
+<ee:message >
+<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::Runtime
+output application/json
+---
+payload wait 2000]]></ee:set-payload>
+</ee:message>
+</ee:transform>
+<set-payload value='#[(now()) as String {format:"hh:mm:ss"}]' doc:name="endtime" doc:id="66239370-cc37-4440-8df0-0014b92187e4" />
+<set-variable value="#[payload]" doc:name="giving end time" doc:id="b241d382-c7c7-429e-a6df-46a7b990b1b3" variableName="endtime "/>
+<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;    starttime:vars.starttime,&#10;    endtime:vars.endtime,&#10;    timetaken: ((vars.endtime - vars.starttime) splitBy "T")[1]&#10;}]' doc:name="Set Payload" doc:id="58611e8b-702f-443a-8fc7-fca2c4f27057" />
+</flow>
+<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="39f28356-7afc-4c70-b866-edde69d8d099" >
+<http:listener-connection host="0.0.0.0" port="8081" />
+</http:listener-config>
+<flow name="async-Flow" doc:id="c7f62cfd-cb8d-440f-8d3d-e12d7ab88595" >
+<http:listener doc:name="Listener" doc:id="f8b51a55-2365-43b7-a80f-00437b4cf940" config-ref="HTTP_Listener_config" path="/async"/>
+<set-payload value='#[(now()) as String {format:"hh:mm:ss"}]' doc:name="starttime" doc:id="0940b915-7e03-4d64-9fd5-a816ac09883b" />
+<set-variable value="#[payload]" doc:name="giving start time" doc:id="0988c17e-b00d-48c5-887a-4689664b5a35" variableName="starttime" />
+<async doc:name="Async" doc:id="e0ea75d5-8a83-4dcc-9011-56c23b2475c3" >
+<logger level="INFO" doc:name="task1" doc:id="e7aa26ad-bd99-474e-b606-5ea95eecfd5c" />
+<ee:transform doc:name="Transform Message" doc:id="55925d9f-e11f-4fa8-940d-f5b4e8dee200">
+<ee:message>
+<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::Runtime
+output application/json
+---
+payload wait 1000]]></ee:set-payload>
+</ee:message>
+</ee:transform>
+			<logger level="INFO" doc:name="task2" doc:id="b4b0dbf9-36e6-4b31-99cb-d586dca6d515" />
+<ee:transform doc:name="Transform Message" doc:id="a8ac93f3-1319-4fea-b6e1-9716644c9c65">
+<ee:message>
+<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::Runtime
+output application/json
+---
+payload wait 5000 ]]></ee:set-payload>
+</ee:message>
+</ee:transform>
+			<logger level="INFO" doc:name="task3" doc:id="785e61cb-25b1-4a70-8b92-f5a1320f6336" />
+<ee:transform doc:name="Transform Message" doc:id="29b9c260-8509-452d-9aad-b8d6cc523842">
+<ee:message>
+<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::Runtime
+output application/json
+---
+payload wait 2000]]></ee:set-payload>
+</ee:message>
+</ee:transform>
+</async>
+<set-payload value='#[(now()) as String {format:"hh:mm:ss"}]' doc:name="endtime" doc:id="4ea5f152-5b71-460f-8c42-8493058d5a22" />
+<set-variable value="#[payload]" doc:name="giving end time" doc:id="816700a3-c52a-49da-b356-eeb9953401ee" variableName="endtime" />
+<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;    starttime:vars.starttime,&#10;    endtime:vars.endtime,&#10;    timetaken: ((vars.endtime - vars.starttime) splitBy "T")[1]&#10;}]' doc:name="Set Payload" doc:id="5183acbe-e559-4c2a-ab94-dc37c8b2cb96" />
+</flow>
+</mule>
